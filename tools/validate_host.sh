@@ -12,6 +12,7 @@ python3 -m py_compile \
   python/run_test.py \
   python/run_e2e.py \
   python/bevformer.py \
+  python/acceptance.py \
   python/temporal.py \
   python/utils.py \
   python/runtime_api.py \
