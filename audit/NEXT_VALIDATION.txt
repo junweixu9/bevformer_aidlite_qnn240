@@ -1,0 +1,59 @@
+BEVFORMER_AIDLITE_QNN240_REFACTOR_VALIDATION
+
+STATIC_REFACTOR_STATUS=COMPLETE
+HOST_VALIDATION_STATUS=NOT_EXECUTED_IN_THIS_GITHUB_SESSION
+BOARD_REGRESSION_STATUS=NOT_EXECUTED_AFTER_REFACTOR
+FINAL_TEACHER_DELIVERY_GATE=HOLD
+
+1. Container B: update the local checkout
+
+git checkout main
+git pull --ff-only origin main
+
+2. Board-independent validation
+
+python3 -m pip install -r requirements-host.txt
+bash tools/validate_host.sh
+
+Expected:
+PYTHON_COMPILE_GATE=PASS
+SHELL_SYNTAX_GATE=PASS
+NMS_CONTRACT_GATE=PASS
+UNIT_TEST_GATE=PASS
+HOST_VALIDATION_GATE=PASS
+
+3. Create private board configuration
+
+cp tools/board.env.example tools/board.env
+
+Edit tools/board.env. Either install models/assets into the standard project paths or point the variables to the already validated frozen board assets.
+
+4. Environment and asset preflight
+
+bash tools/preflight_host.sh
+bash tools/preflight_board.sh
+
+Expected:
+HOST_PREFLIGHT_GATE=PASS
+BOARD_PREFLIGHT_GATE=PASS
+
+5. Full remote regression
+
+bash tools/run_remote.sh
+
+Expected final result:
+RESULT_PULL_EXIT=0
+OUTPUT_COORDINATES_GATE=PASS
+WARMUP_COUNT_GATE=PASS
+MEASURED_FRAME_COUNT_GATE=PASS
+INTERPRETER_IDENTITY_STABLE_GATE=PASS
+CLEANUP_GATE=PASS
+NO_RUNTIME_EXCEPTION_GATE=PASS
+CORRECTED_VERIFICATION_EXIT=0
+FINAL_DELIVERY_ACCEPTANCE_GATE=PASS
+
+6. Acceptance rule
+
+Only after steps 2-5 pass may FINAL_TEACHER_DELIVERY_GATE be changed from HOLD to PASS.
+
+Scope: six-camera preprocessed tensors to ordered 3D coordinates. Raw image decode/preprocess, zero-copy, and official full nuScenes validation are not included.
