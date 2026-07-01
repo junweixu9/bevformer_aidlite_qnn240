@@ -35,6 +35,11 @@ VERSION
 requirements-host.txt
 python/
   run_test.py
+  bevformer.py
+  temporal.py
+  utils.py
+  runtime_api.py
+  postprocess_api.py
   bevformer_aidlite_qnn240_e2e_performance_v1.py
   functional_mother.py
   portable_numpy_nmsfreecoder.py
@@ -43,6 +48,7 @@ python/
 configs/
   nms_runtime_contract.json
 tools/
+  run_remote.sh
   run_board.sh
   preflight_host.sh
   preflight_board.sh
@@ -52,6 +58,7 @@ models/
   EXPECTED_SHA256.txt
 assets/
   README.md
+tests/
 outputs/
 ```
 
@@ -81,23 +88,33 @@ python3 python/run_test.py \
   --output-dir ./outputs/direct_board_run
 ```
 
-`python/run_test.py` is the actual inference entry. It validates all paths and invokes the frozen numerically validated runner with explicit arguments.
+`python/run_test.py` is the actual inference entry. It validates all paths, calls the frozen numerically validated runner, checks warmup/measured execution, and applies the corrected float32 contract before returning its final exit code.
 
 ## Container-B remote execution
 
 ```bash
 bash tools/preflight_host.sh
 bash tools/preflight_board.sh
-bash tools/run_board.sh
+bash tools/run_remote.sh
 ```
 
-The remote helper deploys the same Python entry and static contract, executes it on QCS8550, pulls results, and runs independent corrected float32 verification.
+`tools/run_remote.sh` is the public remote entry and forwards to `tools/run_board.sh`. The remote helper deploys the same Python entry and static contract, executes it on QCS8550, pulls results, and performs an additional host-side acceptance check.
 
 Expected final marker:
 
 ```text
 FINAL_DELIVERY_ACCEPTANCE_GATE=PASS
 ```
+
+## Unit tests
+
+The host-only tests do not require AidLite or a development board:
+
+```bash
+python3 -m pytest -q
+```
+
+They cover corrected float32 acceptance, manifest structure, deterministic NumPy NMSFreeCoder behavior, and temporal scene-start state.
 
 ## Verify existing coordinates
 
