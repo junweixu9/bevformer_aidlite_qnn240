@@ -1,0 +1,29 @@
+﻿# Python cache
+__pycache__/
+*.py[cod]
+
+# Python environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Local credentials and configuration
+.env
+.env.*
+tools/board.env
+*.key
+*.pem
+*.p12
+
+# Runtime-generated outputs
+outputs/
+runs/
+*.log
+
+# Operating system
+.DS_Store
+Thumbs.db
