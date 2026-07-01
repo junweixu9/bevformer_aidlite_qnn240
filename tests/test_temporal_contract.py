@@ -41,3 +41,12 @@ def test_missing_live_state_fails():
     except RuntimeError:
         return
     raise AssertionError("frame 001 was accepted without live previous_bev")
+
+
+def test_zero_degree_rotation_matches_fp16_round_trip():
+    values = np.linspace(-2.0, 2.0, np.prod(MODULE.BEV_SHAPE), dtype=np.float32)
+    previous = values.reshape(MODULE.BEV_SHAPE)
+    rotation = np.zeros((1, 18), dtype=np.float32)
+    rotated = MODULE.rotate_prev_bev(previous, rotation)
+    expected = previous.astype("<f2").astype(np.float32)
+    np.testing.assert_array_equal(rotated, expected)
