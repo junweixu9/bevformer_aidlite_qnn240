@@ -1,6 +1,6 @@
 # Model installation
 
-The three QNN2.40 serialized contexts are not committed to Git. Install them on the QCS8550 board under:
+Install the three validated QNN2.40 Context files under:
 
 ```text
 models/QCS8550/QNN240/
@@ -9,16 +9,12 @@ models/QCS8550/QNN240/
 └── decoder_context.bin
 ```
 
-Expected SHA256 values are recorded in `models/EXPECTED_SHA256.txt`.
-
-Example:
+From the repository root, run:
 
 ```bash
-mkdir -p models/QCS8550/QNN240
-cp /path/to/backbone_context.bin models/QCS8550/QNN240/
-cp /path/to/encoder_context.bin models/QCS8550/QNN240/
-cp /path/to/decoder_context.bin models/QCS8550/QNN240/
-sha256sum -c models/EXPECTED_SHA256.txt
+bash tools/copy_models.sh BACKBONE_SOURCE ENCODER_SOURCE DECODER_SOURCE models/QCS8550/QNN240
 ```
 
-Do not substitute QAIRT/QNN 2.46 contexts. These identities are the validated QNN2.40 delivery assets.
+The helper verifies source and destination SHA256 values. Expected hashes are recorded in `models/EXPECTED_SHA256.txt`.
+
+Do not substitute QAIRT/QNN 2.46 Context files.
