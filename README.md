@@ -1,6 +1,6 @@
 # BEVFormer AidLite QNN2.40
 
-BEVFormer multi-camera temporal 3D detection on Qualcomm QCS8550 HTP.
+BEVFormer multi-camera temporal 3D detection on Qualcomm QCS8550 HTP. The repository follows the AidLite example style: one direct Python inference entry, explicit model and asset paths, small deployment tools, and reproducible output checks.
 
 ## Supported pipeline
 
@@ -12,10 +12,10 @@ six-camera preprocessed tensors
 → live prev_bev rotation and recursion
 → QNN2.40 Snapshot Decoder on HTP
 → NumPy NMSFreeCoder on board CPU
-→ boxes (N,9), scores (N,), labels (N,)
+→ boxes (300,9), scores (300,), labels (300,)
 ```
 
-The logical `images` shape is `(6,3,450,800)`. Assets may be stored as FP16 or FP32 according to the manifest; the AidLite API receives contiguous float32 arrays. JPEG/PNG decode, resize, normalize, zero-copy, and full official nuScenes validation are outside this release.
+The logical `images` input is little-endian float32 with shape `(6,3,450,800)`. JPEG/PNG decode, resize, normalize, zero-copy, and official full nuScenes validation are outside this release.
 
 ## Validated environment
 
@@ -34,13 +34,14 @@ README.md
 VERSION
 requirements-host.txt
 python/
-  run_test.py
-  bevformer.py
-  temporal.py
-  utils.py
-  runtime_api.py
-  postprocess_api.py
-  bevformer_aidlite_qnn240_e2e_performance_v1.py
+  run_test.py                    # direct QCS8550 inference entry
+  bevformer.py                   # pipeline facade and explicit runner command
+  acceptance.py                  # runtime gates and corrected accuracy contract
+  temporal.py                    # reusable prev_bev state and rotation API
+  utils.py                       # Manifest and SHA helpers
+  runtime_api.py                 # focused AidLite runtime facade
+  postprocess_api.py             # focused postprocess facade
+  bevformer_aidlite_qnn240_e2e_performance_v1.py  # frozen numerical runner
   functional_mother.py
   portable_numpy_nmsfreecoder.py
   verify_contract.py
@@ -48,12 +49,13 @@ python/
 configs/
   nms_runtime_contract.json
 tools/
-  run_remote.sh
-  run_board.sh
-  copy_models.sh
-  copy_demo_assets.py
+  validate_host.sh               # board-independent repository validation
+  run_remote.sh                  # public Container-B remote entry
+  run_board.sh                   # deploy, execute, and pull results
   preflight_host.sh
   preflight_board.sh
+  copy_models.sh
+  copy_demo_assets.py
   board.env.example
 models/
   README.md
@@ -61,23 +63,41 @@ models/
 assets/
   README.md
 tests/
-outputs/
+docs/
+  ARCHITECTURE.md
+audit/
+  NEXT_VALIDATION.txt
+outputs/                          # generated and ignored by Git
 ```
 
-## Setup
+See `docs/ARCHITECTURE.md` for the call graph and per-file responsibilities.
 
-Install the host-only dependencies and create the private board configuration:
+## 1. Host setup and static validation
+
+Run in Container B or another Linux Host environment:
 
 ```bash
 python3 -m pip install -r requirements-host.txt
+bash tools/validate_host.sh
+```
+
+Expected final marker:
+
+```text
+HOST_VALIDATION_GATE=PASS
+```
+
+## 2. Private board configuration
+
+```bash
 cp tools/board.env.example tools/board.env
 ```
 
-Edit `tools/board.env`. It is ignored by Git.
+Edit `tools/board.env`. It is ignored by Git. Host project paths are derived from script locations and are not hardcoded in this file.
 
-## Install validated models
+## 3. Install validated models
 
-Copy the three existing QNN2.40 Context files into the standard project directory:
+Run on the machine that holds the three Context files:
 
 ```bash
 bash tools/copy_models.sh \
@@ -87,19 +107,21 @@ bash tools/copy_models.sh \
   ./models/QCS8550/QNN240
 ```
 
-The script validates the frozen SHA256 values before and after copying.
+The script validates the frozen SHA256 identities before and after copying.
 
-## Install the ten-frame demonstration assets
+## 4. Install the ten-frame demonstration assets
+
+Run where the source Manifest paths are accessible:
 
 ```bash
 python3 tools/copy_demo_assets.py \
-  --source-manifest /path/to/original/asset_manifest.json \
+  --source-manifest /path/to/validated/asset_manifest.json \
   --destination ./assets/unseen10
 ```
 
-The installer checks `status=PASS`, verifies `frame_indices=[0..9]`, validates every source SHA when provided, copies assets into per-frame directories, and rewrites the installed Manifest paths.
+The tool validates source files, copies them into per-frame directories, rewrites record paths, and writes the installed Manifest.
 
-## Direct board inference
+## 5. Direct board inference
 
 Run on QCS8550:
 
@@ -114,9 +136,18 @@ python3 python/run_test.py \
   --output-dir ./outputs/direct_board_run
 ```
 
-`python/run_test.py` is the actual inference entry. It validates all paths, calls the frozen numerically validated runner, checks warmup/measured execution, and applies the corrected float32 contract before returning its final exit code.
+Execution path:
 
-## Container-B remote execution
+```text
+run_test.py
+→ BevFormerPipeline
+→ frozen numerical Runner
+→ acceptance.py
+```
+
+The frozen Runner remains the numerical source of truth. The public entry returns zero only when runtime completion and the corrected float32 coordinate contract pass.
+
+## 6. Container-B remote execution
 
 ```bash
 bash tools/preflight_host.sh
@@ -124,7 +155,7 @@ bash tools/preflight_board.sh
 bash tools/run_remote.sh
 ```
 
-`tools/run_remote.sh` is the public remote entry and forwards to `tools/run_board.sh`. The remote helper deploys the same Python entry and static contract, executes it on QCS8550, pulls results, and performs an additional host-side acceptance check.
+The remote helper deploys the same board entry, runs it on QCS8550, pulls the output directory, and repeats coordinate verification on the Host.
 
 Expected final marker:
 
@@ -132,17 +163,7 @@ Expected final marker:
 FINAL_DELIVERY_ACCEPTANCE_GATE=PASS
 ```
 
-## Unit tests
-
-The host-only tests do not require AidLite or a development board:
-
-```bash
-python3 -m pytest -q
-```
-
-They cover corrected float32 acceptance, manifest structure, deterministic NumPy NMSFreeCoder behavior, and temporal scene-start state.
-
-## Verify existing coordinates
+## 7. Verify existing coordinates without inference
 
 ```bash
 python3 python/verify_contract.py \
@@ -152,15 +173,15 @@ python3 python/verify_contract.py \
   --report-txt outputs/run_YYYYMMDD_HHMMSS/corrected_report.txt
 ```
 
-Contract:
+Acceptance contract:
 
-- shapes identical;
-- all values finite;
-- labels exact and ordered;
+- shapes exactly `(300,9)`, `(300,)`, and `(300,)`;
+- all floating values finite;
+- labels exactly equal and ordered;
 - score max absolute error at most `2 × float32 epsilon`;
 - box max absolute error at most `8 × float32 epsilon`.
 
-A nonzero historical strict exit is accepted only when warmup, ten measured frames, interpreter identity, cleanup, result pull, and the independent corrected contract all pass.
+The original strict `1e-7` score failure is preserved. It is accepted only when warmup, ten measured frames, Interpreter identity, cleanup, no runtime exception, and the corrected contract all pass.
 
 ## Performance baseline
 
@@ -175,6 +196,10 @@ Protocol: 3 warmup frames and 10 measured frames. Context loading, Python startu
 | NMSFreeCoder mean | 0.683763 ms |
 | Total wall mean | 474.943284 ms |
 | Total wall P95 | 481.733953 ms |
+
+## Current validation status
+
+Repository refactoring is complete. Host validation and the post-refactor QCS8550 regression must still be executed from Container B before declaring final teacher delivery `PASS`. The exact checklist is in `audit/NEXT_VALIDATION.txt`.
 
 ## Current limitations
 
