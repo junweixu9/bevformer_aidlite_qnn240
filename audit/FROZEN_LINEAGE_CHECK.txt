@@ -1,0 +1,30 @@
+FROZEN_RUNNER_PACKAGE_LINEAGE_CHECK
+
+Run in Container B from the repository root.
+
+SOURCE=/workspace/BEVFormer_ai/audit_runs/manual_assets/bevformer_aidlite_qnn240_e2e_performance_runner_v1_20260630
+
+First verify the source package itself:
+
+(cd "$SOURCE" && sha256sum -c PACKAGE_SHA256SUMS)
+
+Then compare repository files with the frozen package:
+
+cmp -s "$SOURCE/bevformer_aidlite_qnn240_e2e_performance_v1.py" python/bevformer_aidlite_qnn240_e2e_performance_v1.py
+cmp -s "$SOURCE/functional_mother.py" python/functional_mother.py
+cmp -s "$SOURCE/portable_numpy_nmsfreecoder.py" python/portable_numpy_nmsfreecoder.py
+cmp -s "$SOURCE/nms_runtime_contract.json" configs/nms_runtime_contract.json
+cmp -s "$SOURCE/frame009_numpy_native_reference.npz" python/frame009_numpy_native_reference.npz
+
+All five comparisons must return exit code 0.
+
+Required final interpretation:
+
+RUNNER_LINEAGE_GATE=PASS
+FUNCTIONAL_MOTHER_LINEAGE_GATE=PASS
+NUMPY_NMS_LINEAGE_GATE=PASS
+NMS_CONTRACT_LINEAGE_GATE=PASS
+FRAME009_REFERENCE_LINEAGE_GATE=PASS
+FROZEN_PACKAGE_LINEAGE_GATE=PASS
+
+Until this check is executed, FROZEN_PACKAGE_LINEAGE_GATE remains HOLD. Field-level JSON agreement is not sufficient to claim byte-identical asset identity.
