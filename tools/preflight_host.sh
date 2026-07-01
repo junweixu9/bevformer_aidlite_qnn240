@@ -27,6 +27,8 @@ check(){
 echo "AUDIT_TYPE=BEVFORMER_HOST_PREFLIGHT"
 echo "PROJECT_ROOT=$PROJECT_ROOT"
 check RUN_TEST       "$PROJECT_ROOT/python/run_test.py"
+check PIPELINE       "$PROJECT_ROOT/python/bevformer.py"
+check ACCEPTANCE     "$PROJECT_ROOT/python/acceptance.py"
 check RUNNER         "$PROJECT_ROOT/python/bevformer_aidlite_qnn240_e2e_performance_v1.py"
 check NMS            "$PROJECT_ROOT/python/portable_numpy_nmsfreecoder.py"
 check MOTHER         "$PROJECT_ROOT/python/functional_mother.py"
@@ -36,6 +38,8 @@ check NMS_CONTRACT   "$PROJECT_ROOT/configs/nms_runtime_contract.json"
 
 python3 -m py_compile \
   "$PROJECT_ROOT/python/run_test.py" \
+  "$PROJECT_ROOT/python/bevformer.py" \
+  "$PROJECT_ROOT/python/acceptance.py" \
   "$PROJECT_ROOT/python/bevformer_aidlite_qnn240_e2e_performance_v1.py" \
   "$PROJECT_ROOT/python/portable_numpy_nmsfreecoder.py" \
   "$PROJECT_ROOT/python/functional_mother.py" \
