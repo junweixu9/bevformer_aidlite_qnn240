@@ -50,6 +50,8 @@ configs/
 tools/
   run_remote.sh
   run_board.sh
+  copy_models.sh
+  copy_demo_assets.py
   preflight_host.sh
   preflight_board.sh
   board.env.example
@@ -64,14 +66,38 @@ outputs/
 
 ## Setup
 
-Create the local board configuration before running remote tools:
+Install the host-only dependencies and create the private board configuration:
 
 ```bash
 python3 -m pip install -r requirements-host.txt
 cp tools/board.env.example tools/board.env
 ```
 
-Edit `tools/board.env`. It is ignored by Git. Install the three QNN2.40 Context files and the ten-frame demonstration assets under the standard board paths described in `models/README.md` and `assets/README.md`.
+Edit `tools/board.env`. It is ignored by Git.
+
+## Install validated models
+
+Copy the three existing QNN2.40 Context files into the standard project directory:
+
+```bash
+bash tools/copy_models.sh \
+  /path/to/backbone_context.bin \
+  /path/to/encoder_context.bin \
+  /path/to/decoder_context.bin \
+  ./models/QCS8550/QNN240
+```
+
+The script validates the frozen SHA256 values before and after copying.
+
+## Install the ten-frame demonstration assets
+
+```bash
+python3 tools/copy_demo_assets.py \
+  --source-manifest /path/to/original/asset_manifest.json \
+  --destination ./assets/unseen10
+```
+
+The installer checks `status=PASS`, verifies `frame_indices=[0..9]`, validates every source SHA when provided, copies assets into per-frame directories, and rewrites the installed Manifest paths.
 
 ## Direct board inference
 
