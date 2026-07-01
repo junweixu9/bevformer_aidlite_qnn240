@@ -1,0 +1,587 @@
+{
+  "aidlite_library_version": "Aidlux_Aidlite_C4L_V2.4.0.265_fd414d7_20260521",
+  "aidlite_python_version": "Aidlux_Aidlite_P4L_V2.4.0.265_fd414d7_20260521",
+  "asset_disk_io_in_measured_loop": false,
+  "asset_preload_ms": 682.803331,
+  "audit_type": "AIDLITE_QNN240_E2E_PERFORMANCE_RUNNER_V1",
+  "cleanup": [
+    {
+      "method": "destroy",
+      "name": "decoder",
+      "return_code": 0
+    },
+    {
+      "method": "destroy",
+      "name": "encoder",
+      "return_code": 0
+    },
+    {
+      "method": "destroy",
+      "name": "backbone",
+      "return_code": 0
+    }
+  ],
+  "cleanup_gate": "PASS",
+  "final_output_verification": {
+    "box_max_abs_error": 4.76837158203125e-07,
+    "box_tolerance": 1e-06,
+    "gate": "FAIL",
+    "label_exact": true,
+    "score_max_abs_error": 1.1920928955078125e-07,
+    "score_tolerance": 1e-07,
+    "shape_equal": true
+  },
+  "intermediate_handoff_mode": "NUMPY_MEMORY",
+  "interpreter_identity_stable": true,
+  "interpreter_load_in_steady_state": false,
+  "jpeg_or_video_decode_included": false,
+  "measured_frame_count": 10,
+  "measured_frames": [
+    {
+      "backbone_get_output_ms": 0.622963,
+      "backbone_invoke_ms": 22.856711,
+      "backbone_set_input_ms": 13.009408,
+      "backbone_to_encoder_handoff_ms": 3.154137,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.359997,
+      "decoder_invoke_ms": 39.603167,
+      "decoder_set_input_ms": 2.836588,
+      "encoder_get_output_ms": 4.031107,
+      "encoder_invoke_ms": 360.232685,
+      "encoder_set_input_ms": 5.406201,
+      "encoder_to_decoder_handoff_ms": 0.002083,
+      "frame_index": 0,
+      "frame_total_wall_ms": 453.864091,
+      "nmsfreecoder_ms": 0.541818,
+      "prev_bev_rotate_ms": 0.004584,
+      "three_model_invoke_ms": 422.692563
+    },
+    {
+      "backbone_get_output_ms": 0.379476,
+      "backbone_invoke_ms": 22.186717,
+      "backbone_set_input_ms": 6.164838,
+      "backbone_to_encoder_handoff_ms": 2.568361,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.400413,
+      "decoder_invoke_ms": 39.445512,
+      "decoder_set_input_ms": 1.634672,
+      "encoder_get_output_ms": 2.491748,
+      "encoder_invoke_ms": 360.517161,
+      "encoder_set_input_ms": 2.831588,
+      "encoder_to_decoder_handoff_ms": 0.001927,
+      "frame_index": 1,
+      "frame_total_wall_ms": 475.89633,
+      "nmsfreecoder_ms": 0.604942,
+      "prev_bev_rotate_ms": 36.122366,
+      "three_model_invoke_ms": 422.14939
+    },
+    {
+      "backbone_get_output_ms": 0.34583,
+      "backbone_invoke_ms": 22.308539,
+      "backbone_set_input_ms": 6.137702,
+      "backbone_to_encoder_handoff_ms": 2.577268,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.369528,
+      "decoder_invoke_ms": 39.170411,
+      "decoder_set_input_ms": 1.523996,
+      "encoder_get_output_ms": 2.641121,
+      "encoder_invoke_ms": 358.769209,
+      "encoder_set_input_ms": 2.852939,
+      "encoder_to_decoder_handoff_ms": 0.002396,
+      "frame_index": 2,
+      "frame_total_wall_ms": 476.283202,
+      "nmsfreecoder_ms": 0.547807,
+      "prev_bev_rotate_ms": 38.405522,
+      "three_model_invoke_ms": 420.248159
+    },
+    {
+      "backbone_get_output_ms": 0.357653,
+      "backbone_invoke_ms": 22.246977,
+      "backbone_set_input_ms": 6.1564,
+      "backbone_to_encoder_handoff_ms": 2.567788,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.285882,
+      "decoder_invoke_ms": 38.957183,
+      "decoder_set_input_ms": 1.549257,
+      "encoder_get_output_ms": 2.495446,
+      "encoder_invoke_ms": 360.901949,
+      "encoder_set_input_ms": 2.8002849999999997,
+      "encoder_to_decoder_handoff_ms": 0.002968,
+      "frame_index": 3,
+      "frame_total_wall_ms": 478.907968,
+      "nmsfreecoder_ms": 0.49109,
+      "prev_bev_rotate_ms": 39.486866,
+      "three_model_invoke_ms": 422.106109
+    },
+    {
+      "backbone_get_output_ms": 0.327809,
+      "backbone_invoke_ms": 22.164321,
+      "backbone_set_input_ms": 6.118172,
+      "backbone_to_encoder_handoff_ms": 2.593569,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.306871,
+      "decoder_invoke_ms": 38.96661,
+      "decoder_set_input_ms": 1.645141,
+      "encoder_get_output_ms": 2.480706,
+      "encoder_invoke_ms": 360.027895,
+      "encoder_set_input_ms": 2.844139,
+      "encoder_to_decoder_handoff_ms": 0.002291,
+      "frame_index": 4,
+      "frame_total_wall_ms": 477.913134,
+      "nmsfreecoder_ms": 0.443173,
+      "prev_bev_rotate_ms": 39.354159,
+      "three_model_invoke_ms": 421.15882600000003
+    },
+    {
+      "backbone_get_output_ms": 0.338434,
+      "backbone_invoke_ms": 22.225051,
+      "backbone_set_input_ms": 6.191608,
+      "backbone_to_encoder_handoff_ms": 2.540706,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.30124700000000004,
+      "decoder_invoke_ms": 38.900309,
+      "decoder_set_input_ms": 1.531756,
+      "encoder_get_output_ms": 2.545861,
+      "encoder_invoke_ms": 360.383673,
+      "encoder_set_input_ms": 2.8587739999999995,
+      "encoder_to_decoder_handoff_ms": 0.002084,
+      "frame_index": 5,
+      "frame_total_wall_ms": 479.094217,
+      "nmsfreecoder_ms": 0.48937,
+      "prev_bev_rotate_ms": 40.104464,
+      "three_model_invoke_ms": 421.509033
+    },
+    {
+      "backbone_get_output_ms": 0.361924,
+      "backbone_invoke_ms": 22.242185,
+      "backbone_set_input_ms": 6.15541,
+      "backbone_to_encoder_handoff_ms": 2.544663,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.7183269999999999,
+      "decoder_invoke_ms": 39.437179,
+      "decoder_set_input_ms": 1.585141,
+      "encoder_get_output_ms": 2.496747,
+      "encoder_invoke_ms": 361.400122,
+      "encoder_set_input_ms": 2.8420050000000003,
+      "encoder_to_decoder_handoff_ms": 0.002865,
+      "frame_index": 6,
+      "frame_total_wall_ms": 472.155116,
+      "nmsfreecoder_ms": 0.514058,
+      "prev_bev_rotate_ms": 31.185694,
+      "three_model_invoke_ms": 423.07948600000003
+    },
+    {
+      "backbone_get_output_ms": 0.334476,
+      "backbone_invoke_ms": 22.286716,
+      "backbone_set_input_ms": 6.185046,
+      "backbone_to_encoder_handoff_ms": 2.574507,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.65364,
+      "decoder_invoke_ms": 39.417648,
+      "decoder_set_input_ms": 1.562329,
+      "encoder_get_output_ms": 2.732682,
+      "encoder_invoke_ms": 359.93576,
+      "encoder_set_input_ms": 2.779871,
+      "encoder_to_decoder_handoff_ms": 0.002813,
+      "frame_index": 7,
+      "frame_total_wall_ms": 481.775337,
+      "nmsfreecoder_ms": 0.607182,
+      "prev_bev_rotate_ms": 41.998249,
+      "three_model_invoke_ms": 421.640124
+    },
+    {
+      "backbone_get_output_ms": 0.34859,
+      "backbone_invoke_ms": 22.184999,
+      "backbone_set_input_ms": 6.21442,
+      "backbone_to_encoder_handoff_ms": 2.517372,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.402652,
+      "decoder_invoke_ms": 38.723019,
+      "decoder_set_input_ms": 1.568631,
+      "encoder_get_output_ms": 2.360291,
+      "encoder_invoke_ms": 358.017862,
+      "encoder_set_input_ms": 2.833881,
+      "encoder_to_decoder_handoff_ms": 0.001146,
+      "frame_index": 8,
+      "frame_total_wall_ms": 475.770081,
+      "nmsfreecoder_ms": 0.502496,
+      "prev_bev_rotate_ms": 39.688062,
+      "three_model_invoke_ms": 418.92588
+    },
+    {
+      "backbone_get_output_ms": 0.357028,
+      "backbone_invoke_ms": 22.232445,
+      "backbone_set_input_ms": 6.226348,
+      "backbone_to_encoder_handoff_ms": 2.539664,
+      "coordinate_count": 300,
+      "decoder_get_output_ms": 0.273018,
+      "decoder_invoke_ms": 38.602915,
+      "decoder_set_input_ms": 1.506704,
+      "encoder_get_output_ms": 2.746485,
+      "encoder_invoke_ms": 360.938615,
+      "encoder_set_input_ms": 2.906326,
+      "encoder_to_decoder_handoff_ms": 0.001979,
+      "frame_index": 9,
+      "frame_total_wall_ms": 479.991447,
+      "nmsfreecoder_ms": 0.446194,
+      "prev_bev_rotate_ms": 40.74076,
+      "three_model_invoke_ms": 421.773975
+    }
+  ],
+  "measured_loop_file_write": false,
+  "measurement_scope": "SIX_CAMERA_TENSOR_TO_3D_COORDINATE_ARRAY",
+  "model_load_timing_ms": {
+    "backbone": 417.055949,
+    "decoder": 173.143935,
+    "encoder": 306.197988
+  },
+  "model_load_total_ms": 896.433758,
+  "models": [
+    {
+      "builder_method": "build_interpreter_from_model_and_config",
+      "init_rc": 0,
+      "inputs": [
+        {
+          "element_count": 6480000,
+          "element_type": "DataType.TYPE_UINT8",
+          "graph_index": 0,
+          "name": "images",
+          "shape": [
+            6,
+            3,
+            450,
+            800
+          ],
+          "tensor_index": 0
+        }
+      ],
+      "load_model_rc": 0,
+      "name": "backbone",
+      "object_id": 548212071856,
+      "outputs": [
+        {
+          "element_count": 576000,
+          "element_type": "DataType.TYPE_UINT8",
+          "graph_index": 0,
+          "name": "img_feat",
+          "shape": [
+            6,
+            256,
+            15,
+            25
+          ],
+          "tensor_index": 0
+        }
+      ],
+      "path": "/home/aidlux/bevformer_qairt240_board_staged_triplet_smoke_20260628_124406/model/backbone_context.bin",
+      "sha256": "ec709ae41f0dc6b25e2f8950abc8e15a5c85301ac31eea1fa1750927e364c945"
+    },
+    {
+      "builder_method": "build_interpreter_from_model_and_config",
+      "init_rc": 0,
+      "inputs": [
+        {
+          "element_count": 18,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "can_bus",
+          "shape": [
+            1,
+            18
+          ],
+          "tensor_index": 0
+        },
+        {
+          "element_count": 576000,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "img_feat",
+          "shape": [
+            1,
+            6,
+            256,
+            15,
+            25
+          ],
+          "tensor_index": 1
+        },
+        {
+          "element_count": 96,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "lidar2img",
+          "shape": [
+            1,
+            6,
+            4,
+            4
+          ],
+          "tensor_index": 2
+        },
+        {
+          "element_count": 2,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "shift",
+          "shape": [
+            1,
+            2
+          ],
+          "tensor_index": 3
+        },
+        {
+          "element_count": 640000,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "prev_bev",
+          "shape": [
+            1,
+            2500,
+            256
+          ],
+          "tensor_index": 4
+        }
+      ],
+      "load_model_rc": 0,
+      "name": "encoder",
+      "object_id": 547941611184,
+      "outputs": [
+        {
+          "element_count": 640000,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "bev_embed",
+          "shape": [
+            1,
+            2500,
+            256
+          ],
+          "tensor_index": 0
+        }
+      ],
+      "path": "/home/aidlux/bevformer_qairt240_fp16_smoke_20260626_144112/model/encoder_fp16_qairt240_o3_soc43.serialized.bin",
+      "sha256": "2868cb971a6e291ff9d3d874b2dfe2238c4b545ffdb8af1b01b7b56697ce71a1"
+    },
+    {
+      "builder_method": "build_interpreter_from_model_and_config",
+      "init_rc": 0,
+      "inputs": [
+        {
+          "element_count": 640000,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "bev_embed",
+          "shape": [
+            1,
+            2500,
+            256
+          ],
+          "tensor_index": 0
+        }
+      ],
+      "load_model_rc": 0,
+      "name": "decoder",
+      "object_id": 547942373360,
+      "outputs": [
+        {
+          "element_count": 9000,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "cls_scores",
+          "shape": [
+            1,
+            900,
+            10
+          ],
+          "tensor_index": 0
+        },
+        {
+          "element_count": 9000,
+          "element_type": "DataType.TYPE_FLOAT16",
+          "graph_index": 0,
+          "name": "bbox_preds",
+          "shape": [
+            1,
+            900,
+            10
+          ],
+          "tensor_index": 1
+        }
+      ],
+      "path": "/home/aidlux/bevformer_qairt240_board_staged_triplet_smoke_20260628_124406/model/decoder_context.bin",
+      "sha256": "dacebf6428168bbe0e29410f05285a7fde454860a607c73f983149e607b78d7c"
+    }
+  ],
+  "models_loaded_once": true,
+  "pid": 102238,
+  "runner_main_to_first_coordinate_ms": 2399.992031,
+  "status": "FAIL",
+  "summary_ms": {
+    "backbone_get_output_ms": {
+      "count": 10,
+      "max": 0.622963,
+      "mean": 0.3774183000000001,
+      "median": 0.35280900000000004,
+      "min": 0.327809,
+      "p90": 0.4038246999999999,
+      "p95": 0.5133938499999997,
+      "p99": 0.60104917
+    },
+    "backbone_invoke_ms": {
+      "count": 10,
+      "max": 22.856711,
+      "mean": 22.2934661,
+      "median": 22.237315,
+      "min": 22.164321,
+      "p90": 22.3633562,
+      "p95": 22.6100336,
+      "p99": 22.80737552
+    },
+    "backbone_set_input_ms": {
+      "count": 10,
+      "max": 13.009408,
+      "mean": 6.855935199999999,
+      "median": 6.174942,
+      "min": 6.118172,
+      "p90": 6.904653999999997,
+      "p95": 9.957030999999994,
+      "p99": 12.398932600000002
+    },
+    "backbone_to_encoder_handoff_ms": {
+      "count": 10,
+      "max": 3.154137,
+      "mean": 2.6178035,
+      "median": 2.5680745,
+      "min": 2.517372,
+      "p90": 2.6496258,
+      "p95": 2.9018813999999993,
+      "p99": 3.10368588
+    },
+    "decoder_get_output_ms": {
+      "count": 10,
+      "max": 0.7183269999999999,
+      "mean": 0.40715749999999995,
+      "median": 0.3647625,
+      "min": 0.273018,
+      "p90": 0.6601087,
+      "p95": 0.6892178499999999,
+      "p99": 0.7125051699999999
+    },
+    "decoder_invoke_ms": {
+      "count": 10,
+      "max": 39.603167,
+      "mean": 39.1223953,
+      "median": 39.0685105,
+      "min": 38.602915,
+      "p90": 39.4612775,
+      "p95": 39.53222225,
+      "p99": 39.58897805
+    },
+    "decoder_set_input_ms": {
+      "count": 10,
+      "max": 2.836588,
+      "mean": 1.6944215,
+      "median": 1.56548,
+      "min": 1.506704,
+      "p90": 1.7642856999999996,
+      "p95": 2.3004368499999988,
+      "p99": 2.72935777
+    },
+    "encoder_get_output_ms": {
+      "count": 10,
+      "max": 4.031107,
+      "mean": 2.7022193999999997,
+      "median": 2.5213039999999998,
+      "min": 2.360291,
+      "p90": 2.8749471999999994,
+      "p95": 3.453027099999999,
+      "p99": 3.9154910200000006
+    },
+    "encoder_invoke_ms": {
+      "count": 10,
+      "max": 361.400122,
+      "mean": 360.1124931,
+      "median": 360.308179,
+      "min": 358.017862,
+      "p90": 360.9847657,
+      "p95": 361.19244385,
+      "p99": 361.35858637
+    },
+    "encoder_set_input_ms": {
+      "count": 10,
+      "max": 5.406201,
+      "mean": 3.0956008999999995,
+      "median": 2.8430720000000003,
+      "min": 2.779871,
+      "p90": 3.156313499999999,
+      "p95": 4.281257249999998,
+      "p99": 5.181212250000001
+    },
+    "encoder_to_decoder_handoff_ms": {
+      "count": 10,
+      "max": 0.002968,
+      "mean": 0.0022552,
+      "median": 0.0021875,
+      "min": 0.001146,
+      "p90": 0.0028753,
+      "p95": 0.00292165,
+      "p99": 0.00295873
+    },
+    "frame_total_wall_ms": {
+      "count": 10,
+      "max": 481.775337,
+      "mean": 475.1650923,
+      "median": 477.098168,
+      "min": 453.864091,
+      "p90": 480.169836,
+      "p95": 480.9725865,
+      "p99": 481.61478689999996
+    },
+    "nmsfreecoder_ms": {
+      "count": 10,
+      "max": 0.607182,
+      "mean": 0.518813,
+      "median": 0.5082770000000001,
+      "min": 0.443173,
+      "p90": 0.605166,
+      "p95": 0.606174,
+      "p99": 0.6069804
+    },
+    "prev_bev_rotate_ms": {
+      "count": 10,
+      "max": 41.998249,
+      "mean": 34.7090726,
+      "median": 39.4205125,
+      "min": 0.004584,
+      "p90": 40.8665089,
+      "p95": 41.43237895,
+      "p99": 41.88507499
+    },
+    "three_model_invoke_ms": {
+      "count": 10,
+      "max": 423.07948600000003,
+      "mean": 421.52835450000003,
+      "median": 421.70704950000004,
+      "min": 418.92588,
+      "p90": 422.7312553,
+      "p95": 422.90537065,
+      "p99": 423.04466293
+    }
+  },
+  "warmup_count": 3,
+  "warmup_frames": [
+    {
+      "frame_index": 0,
+      "frame_total_wall_ms": 487.340493
+    },
+    {
+      "frame_index": 1,
+      "frame_total_wall_ms": 493.83064
+    },
+    {
+      "frame_index": 2,
+      "frame_total_wall_ms": 486.814769
+    }
+  ],
+  "warmup_state_reset_before_measurement": true
+}

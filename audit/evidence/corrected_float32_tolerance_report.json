@@ -1,0 +1,15 @@
+{
+  "float32_epsilon": 1.1920928955078125e-07,
+  "shape_gate": "PASS",
+  "finite_gate": "PASS",
+  "label_exact_gate": "PASS",
+  "score_max_abs_error": 1.1920928955078125e-07,
+  "score_tolerance": 2.384185791015625e-07,
+  "score_error_in_epsilon": 1.0,
+  "score_float32_tolerance_gate": "PASS",
+  "box_max_abs_error": 4.76837158203125e-07,
+  "box_tolerance": 9.5367431640625e-07,
+  "box_error_in_epsilon": 4.0,
+  "box_float32_tolerance_gate": "PASS",
+  "ordered_tolerant_parity_gate": "PASS"
+}
