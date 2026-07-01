@@ -13,8 +13,8 @@ fi
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-"$SELF_DIR/preflight_host.sh"
-"$SELF_DIR/preflight_board.sh"
+bash "$SELF_DIR/preflight_host.sh"
+bash "$SELF_DIR/preflight_board.sh"
 
 STAMP=$(date +%Y%m%d_%H%M%S)
 REMOTE_PY="$BOARD_PROJECT_ROOT/python"
