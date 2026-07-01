@@ -1,6 +1,7 @@
 BEVFORMER_AIDLITE_QNN240_REFACTOR_VALIDATION
 
 STATIC_REFACTOR_STATUS=COMPLETE
+FROZEN_PACKAGE_LINEAGE_STATUS=NOT_EXECUTED
 HOST_VALIDATION_STATUS=NOT_EXECUTED_IN_THIS_GITHUB_SESSION
 BOARD_REGRESSION_STATUS=NOT_EXECUTED_AFTER_REFACTOR
 FINAL_TEACHER_DELIVERY_GATE=HOLD
@@ -10,7 +11,19 @@ FINAL_TEACHER_DELIVERY_GATE=HOLD
 git checkout main
 git pull --ff-only origin main
 
-2. Board-independent validation
+2. Verify frozen package lineage
+
+Follow audit/FROZEN_LINEAGE_CHECK.txt.
+
+Expected:
+RUNNER_LINEAGE_GATE=PASS
+FUNCTIONAL_MOTHER_LINEAGE_GATE=PASS
+NUMPY_NMS_LINEAGE_GATE=PASS
+NMS_CONTRACT_LINEAGE_GATE=PASS
+FRAME009_REFERENCE_LINEAGE_GATE=PASS
+FROZEN_PACKAGE_LINEAGE_GATE=PASS
+
+3. Board-independent validation
 
 python3 -m pip install -r requirements-host.txt
 bash tools/validate_host.sh
@@ -22,13 +35,13 @@ NMS_CONTRACT_GATE=PASS
 UNIT_TEST_GATE=PASS
 HOST_VALIDATION_GATE=PASS
 
-3. Create private board configuration
+4. Create private board configuration
 
 cp tools/board.env.example tools/board.env
 
 Edit tools/board.env. Either install models/assets into the standard project paths or point the variables to the already validated frozen board assets.
 
-4. Environment and asset preflight
+5. Environment and asset preflight
 
 bash tools/preflight_host.sh
 bash tools/preflight_board.sh
@@ -37,7 +50,7 @@ Expected:
 HOST_PREFLIGHT_GATE=PASS
 BOARD_PREFLIGHT_GATE=PASS
 
-5. Full remote regression
+6. Full remote regression
 
 bash tools/run_remote.sh
 
@@ -52,8 +65,8 @@ NO_RUNTIME_EXCEPTION_GATE=PASS
 CORRECTED_VERIFICATION_EXIT=0
 FINAL_DELIVERY_ACCEPTANCE_GATE=PASS
 
-6. Acceptance rule
+7. Acceptance rule
 
-Only after steps 2-5 pass may FINAL_TEACHER_DELIVERY_GATE be changed from HOLD to PASS.
+Only after steps 2-6 pass may FINAL_TEACHER_DELIVERY_GATE be changed from HOLD to PASS.
 
 Scope: six-camera preprocessed tensors to ordered 3D coordinates. Raw image decode/preprocess, zero-copy, and official full nuScenes validation are not included.
