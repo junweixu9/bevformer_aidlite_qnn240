@@ -4,26 +4,40 @@ from pathlib import Path
 
 import numpy as np
 
-root = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("temporal_module", root / "python" / "temporal.py")
-module = importlib.util.module_from_spec(spec)
-assert spec.loader is not None
-sys.modules[spec.name] = module
-spec.loader.exec_module(module)
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location(
+    "temporal_module", ROOT / "python" / "temporal.py"
+)
+MODULE = importlib.util.module_from_spec(SPEC)
+assert SPEC.loader is not None
+sys.modules[SPEC.name] = MODULE
+SPEC.loader.exec_module(MODULE)
 
 
 def test_frame_zero_uses_zero_state():
-    state = module.TemporalState()
-    zero = np.zeros(module.BEV_SHAPE, dtype=np.float32)
+    state = MODULE.TemporalState()
+    zero = np.zeros(MODULE.BEV_SHAPE, dtype=np.float32)
     value = state.input_for_frame(0, zero, None)
-    assert value.shape == module.BEV_SHAPE
-    assert not np.any(value)
+    assert value.shape == MODULE.BEV_SHAPE
+    assert value.dtype == np.float32
+    assert np.count_nonzero(value) == 0
+
+
+def test_nonzero_scene_start_fails():
+    state = MODULE.TemporalState()
+    invalid = np.ones(MODULE.BEV_SHAPE, dtype=np.float32)
+    try:
+        state.input_for_frame(0, invalid, None)
+    except ValueError:
+        return
+    raise AssertionError("nonzero scene-start prev_bev was accepted")
 
 
 def test_missing_live_state_fails():
-    state = module.TemporalState()
+    state = MODULE.TemporalState()
+    rotation = np.zeros((1, 18), dtype=np.float32)
     try:
-        state.input_for_frame(1, np.zeros(module.BEV_SHAPE), np.zeros((1, 18)))
+        state.input_for_frame(1, np.zeros(MODULE.BEV_SHAPE), rotation)
     except RuntimeError:
         return
-    raise AssertionError("missing live state was accepted")
+    raise AssertionError("frame 001 was accepted without live previous_bev")
