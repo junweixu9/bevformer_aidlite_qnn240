@@ -1,118 +1,141 @@
 # BEVFormer AidLite QNN2.40
 
-多相机 BEV 时空表征 3D 检测，在 QCS8550 HTP 上端到端推理。
+BEVFormer multi-camera temporal 3D detection on Qualcomm QCS8550 HTP.
 
-## 模型信息
+## Supported pipeline
 
-- 架构：BEVFormer (Backbone → Temporal Encoder → Snapshot Decoder)
-- 输入：六路相机预处理张量 (6×3×450×800 uint8)
-- 输出：300 个九维 3D 检测框 (boxes + scores + labels)
-- 目标 SoC：QCS8550 (HTP V73)
-- QNN SDK：2.40
-- AidLite SDK：2.4.0.265
-- 框架类型：TYPE_QNN240
-- 三模型常驻，同一 Python 进程十帧时序递归
-
-## 正式性能基线
-
-| 环节 | 耗时 |
-|------|------|
-| Backbone invoke mean | 22.47 ms |
-| Encoder invoke mean | 355.98 ms |
-| Decoder invoke mean | 37.69 ms |
-| 三模型 Invoke 合计 | 416.14 ms |
-| NMSFreeCoder (CPU) | 0.68 ms |
-| **总墙钟 Mean** | **474.94 ms** |
-| **总墙钟 P95** | **481.73 ms** |
-
-测试合同：3 帧 warmup + 10 帧 measured，不含 Python 启动/Context 加载/原图解码。
-
-## 目录结构
-
-```
-bevformer_aidlite_qnn240/
-├── README.md
-├── python/                         # 所有核心代码
-│   ├── run_e2e.py                  # ★ 本地入口 (参数说明、参考验证)
-│   ├── bevformer_aidlite_qnn240_e2e_performance_v1.py  # 主 Runner
-│   ├── functional_mother.py        # 工具函数
-│   ├── portable_numpy_nmsfreecoder.py  # 板端 NumPy NMSFreeCoder
-│   ├── verify_contract.py          # float32 ε 修正合同验证
-│   ├── frame009_numpy_native_reference.npz  # Frame009 参考坐标
-│   └── run_bevformer_aidlite_qnn240_e2e_performance_v1.sh  # 板端启动器
-├── tools/                          # 编排脚本
-│   ├── run_board.sh                # ★ 板端一键远程执行
-│   ├── preflight_host.sh           # Host 资产检查
-│   ├── preflight_board.sh          # 板端环境检查
-│   └── board.env                   # 板端连接 + 模型路径 + SHA256
-├── models/
-│   └── EXPECTED_SHA256.txt         # 三个 Context 期望 SHA256
-└── outputs/                        # 运行结果 (每次一个 run_YYYYMMDD_HHMMSS/)
+```text
+six-camera preprocessed tensors
+→ QNN2.40 Backbone on HTP
+→ NumPy in-memory handoff
+→ QNN2.40 Temporal Encoder on HTP
+→ live prev_bev rotation and recursion
+→ QNN2.40 Snapshot Decoder on HTP
+→ NumPy NMSFreeCoder on board CPU
+→ boxes (N,9), scores (N,), labels (N,)
 ```
 
-## 一条命令运行
+The logical `images` shape is `(6,3,450,800)`. Assets may be stored as FP16 or FP32 according to the manifest; the AidLite API receives contiguous float32 arrays. JPEG/PNG decode, resize, normalize, zero-copy, and full official nuScenes validation are outside this release.
 
-### 本地 (只检查资产和连接)
+## Validated environment
+
+- QCS8550, HTP V73
+- AidLite SDK 2.4.0.265
+- QNN runtime 2.40
+- `FrameworkType.TYPE_QNN240`
+- Python 3.10
+- NumPy 1.26.4
+- SciPy 1.11.4
+
+## Project layout
+
+```text
+README.md
+VERSION
+requirements-host.txt
+python/
+  run_test.py
+  bevformer_aidlite_qnn240_e2e_performance_v1.py
+  functional_mother.py
+  portable_numpy_nmsfreecoder.py
+  verify_contract.py
+  frame009_numpy_native_reference.npz
+configs/
+  nms_runtime_contract.json
+tools/
+  run_board.sh
+  preflight_host.sh
+  preflight_board.sh
+  board.env.example
+models/
+  README.md
+  EXPECTED_SHA256.txt
+assets/
+  README.md
+outputs/
+```
+
+## Setup
+
+Create the local board configuration before running remote tools:
+
+```bash
+python3 -m pip install -r requirements-host.txt
+cp tools/board.env.example tools/board.env
+```
+
+Edit `tools/board.env`. It is ignored by Git. Install the three QNN2.40 Context files and the ten-frame demonstration assets under the standard board paths described in `models/README.md` and `assets/README.md`.
+
+## Direct board inference
+
+Run on QCS8550:
+
+```bash
+python3 python/run_test.py \
+  --backbone-model ./models/QCS8550/QNN240/backbone_context.bin \
+  --encoder-model ./models/QCS8550/QNN240/encoder_context.bin \
+  --decoder-model ./models/QCS8550/QNN240/decoder_context.bin \
+  --asset-manifest ./assets/unseen10/asset_manifest.json \
+  --nms-contract ./configs/nms_runtime_contract.json \
+  --reference ./python/frame009_numpy_native_reference.npz \
+  --output-dir ./outputs/direct_board_run
+```
+
+`python/run_test.py` is the actual inference entry. It validates all paths and invokes the frozen numerically validated runner with explicit arguments.
+
+## Container-B remote execution
 
 ```bash
 bash tools/preflight_host.sh
 bash tools/preflight_board.sh
-```
-
-### 板端完整执行 (六路张量 → 3D 坐标)
-
-```bash
 bash tools/run_board.sh
 ```
 
-自动完成：
-1. Host 资产检查 (Python 编译、SSH 连通)
-2. 板端环境检查 (AidLite、TYPE_QNN240、Context SHA256)
-3. 资产 Manifest 解析 (自动查找十帧资产清单)
-4. 代码部署到板端
-5. 板端执行 (3 warmup + 10 measured + Frame009 验证)
-6. 结果回拉到 Container B
-7. float32 epsilon 修正合同验证
-8. 输出 FINAL_DELIVERY_ACCEPTANCE_GATE
+The remote helper deploys the same Python entry and static contract, executes it on QCS8550, pulls results, and runs independent corrected float32 verification.
 
-### 仅验证已有坐标 (不重新推理)
+Expected final marker:
+
+```text
+FINAL_DELIVERY_ACCEPTANCE_GATE=PASS
+```
+
+## Verify existing coordinates
 
 ```bash
 python3 python/verify_contract.py \
   --reference python/frame009_numpy_native_reference.npz \
   --candidate outputs/run_YYYYMMDD_HHMMSS/frame009_final_coordinates.npz \
   --report-json outputs/run_YYYYMMDD_HHMMSS/corrected_report.json \
-  --report-txt  outputs/run_YYYYMMDD_HHMMSS/corrected_report.txt
+  --report-txt outputs/run_YYYYMMDD_HHMMSS/corrected_report.txt
 ```
 
-## 精度合同
+Contract:
 
-| 检查项 | 容差 |
-|--------|------|
-| labels | 逐索引完全一致 |
-| scores | max abs error ≤ 2 × float32 ε (≈2.38e-07) |
-| boxes | max abs error ≤ 8 × float32 ε (≈9.54e-07) |
-| shape | 与参考完全一致 |
+- shapes identical;
+- all values finite;
+- labels exact and ordered;
+- score max absolute error at most `2 × float32 epsilon`;
+- box max absolute error at most `8 × float32 epsilon`.
 
-## 文件角色速查
+A nonzero historical strict exit is accepted only when warmup, ten measured frames, interpreter identity, cleanup, result pull, and the independent corrected contract all pass.
 
-| 文件 | 输入 | 输出 | 执行位置 |
-|------|------|------|----------|
-| `tools/run_board.sh` | 无(自动) | FINAL_DELIVERY_ACCEPTANCE_GATE | Container B |
-| `tools/preflight_host.sh` | 无 | HOST_PREFLIGHT_GATE | Container B |
-| `tools/preflight_board.sh` | 无 | BOARD_PREFLIGHT_GATE | Container B→Board |
-| `python/run_bevformer_...sh` | 5 个环境变量 | Python Runner 进程 | QCS8550 Board |
-| `python/bevformer_...e2e...py` | asset_manifest, models, reference | performance_result.json, coordinates.npz | QCS8550 Board |
-| `python/functional_mother.py` | (被 Runner import) | 工具函数 | QCS8550 Board |
-| `python/portable_numpy_nmsfreecoder.py` | cls_scores, bbox_preds | 300 个 3D 检测框 (boxes, scores, labels) | QCS8550 Board CPU |
-| `python/verify_contract.py` | reference.npz, candidate.npz | CORRECTED_VERIFICATION_GATE, 报告 | Container B (本地) |
-| `python/frame009_numpy_native_reference.npz` | (只读参考) | — | — |
+## Performance baseline
 
-## 当前边界
+Protocol: 3 warmup frames and 10 measured frames. Context loading, Python startup, source-asset disk I/O, and image decode are excluded.
 
-- ✅ 六路相机张量 → Backbone → Encoder → Decoder → NMSFreeCoder → 3D 坐标
-- ✅ 三 Interpreter 单进程常驻，NumPy 内存交接
-- ✅ 十帧真实 prev_bev 时序递归
-- ✅ 正式稳态性能 (3 warmup + 10 measured)
-- ❌ 尚未集成原图解码/resize/normalize (V2 计划)
-- ❌ 尚未覆盖完整官方 nuScenes val
+| Metric | Baseline |
+|---|---:|
+| Backbone invoke mean | 22.468505 ms |
+| Encoder invoke mean | 355.982209 ms |
+| Decoder invoke mean | 37.689356 ms |
+| Three-model invoke mean | 416.140070 ms |
+| NMSFreeCoder mean | 0.683763 ms |
+| Total wall mean | 474.943284 ms |
+| Total wall P95 | 481.733953 ms |
+
+## Current limitations
+
+- raw image preprocessing is not part of the frozen path;
+- model files and ten-frame assets are installed separately;
+- NMSFreeCoder runs on board CPU;
+- this is not official full nuScenes validation.
