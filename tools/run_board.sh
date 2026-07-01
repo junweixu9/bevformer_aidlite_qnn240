@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Remote orchestrator. The actual inference entry is python/run_test.py on board.
+# Container-B remote helper. Actual inference and acceptance run in python/run_test.py.
 set -Eeuo pipefail
 SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SELF_DIR/.." && pwd)"
@@ -28,6 +28,8 @@ ssh -o BatchMode=yes "$BOARD_HOST" \
 
 scp -q -o BatchMode=yes \
   "$PROJECT_ROOT/python/run_test.py" \
+  "$PROJECT_ROOT/python/bevformer.py" \
+  "$PROJECT_ROOT/python/acceptance.py" \
   "$PROJECT_ROOT/python/bevformer_aidlite_qnn240_e2e_performance_v1.py" \
   "$PROJECT_ROOT/python/functional_mother.py" \
   "$PROJECT_ROOT/python/portable_numpy_nmsfreecoder.py" \
@@ -67,9 +69,9 @@ exec /usr/bin/python3 "$PY_DIR/run_test.py" \
   --reference "$PY_DIR/frame009_numpy_native_reference.npz" \
   --output-dir "$OUTPUT_DIRECTORY"
 REMOTE_RUN
-strict_rc=${PIPESTATUS[0]}
+remote_rc=${PIPESTATUS[0]}
 set -e
-echo "$strict_rc" > "$LOCAL_OUTPUT/remote_execution.exit_code"
+echo "$remote_rc" > "$LOCAL_OUTPUT/remote_execution.exit_code"
 
 set +e
 ssh -o BatchMode=yes "$BOARD_HOST" "tar -C '$REMOTE_OUTPUT' -czf - ." \
@@ -77,75 +79,39 @@ ssh -o BatchMode=yes "$BOARD_HOST" "tar -C '$REMOTE_OUTPUT' -czf - ." \
 pull_rc=$?
 set -e
 
-echo "STRICT_RUN_EXIT=$strict_rc"
-echo "REMOTE_EXECUTION_EXIT=$strict_rc"
+echo "REMOTE_EXECUTION_EXIT=$remote_rc"
 echo "RESULT_PULL_EXIT=$pull_rc"
 echo "LOCAL_OUTPUT=$LOCAL_OUTPUT"
 
-if [[ $pull_rc -ne 0 ]]; then
-  echo "FINAL_DELIVERY_ACCEPTANCE_GATE=FAIL REASON=RESULT_PULL"
-  exit 1
-fi
-
-RESULT_JSON="$LOCAL_OUTPUT/performance_result.json"
 CANDIDATE="$LOCAL_OUTPUT/frame009_final_coordinates.npz"
 REFERENCE="$PROJECT_ROOT/python/frame009_numpy_native_reference.npz"
 
-if [[ ! -s "$RESULT_JSON" || ! -s "$CANDIDATE" ]]; then
-  echo "OUTPUT_COORDINATES_GATE=FAIL"
-  echo "FINAL_DELIVERY_ACCEPTANCE_GATE=FAIL REASON=MISSING_RESULT"
-  exit 1
-fi
-echo "OUTPUT_COORDINATES_GATE=PASS PATH=$CANDIDATE"
-
 set +e
-python3 - "$RESULT_JSON" <<'PY' | tee "$LOCAL_OUTPUT/runtime_acceptance_report.txt"
-import json, sys
-path = sys.argv[1]
-data = json.load(open(path, encoding="utf-8"))
-checks = {
-    "WARMUP_COUNT_GATE": len(data.get("warmup_frames", [])) == 3,
-    "MEASURED_FRAME_COUNT_GATE": len(data.get("measured_frames", [])) == 10,
-    "INTERPRETER_IDENTITY_STABLE_GATE": data.get("interpreter_identity_stable") is True,
-    "CLEANUP_GATE": data.get("cleanup_gate") == "PASS",
-    "NO_RUNTIME_EXCEPTION_GATE": "exception_type" not in data,
-}
-for key, ok in checks.items():
-    print(f"{key}={'PASS' if ok else 'FAIL'}")
-strict_gate = data.get("final_output_verification", {}).get("gate")
-print("ORIGINAL_STRICT_OUTPUT_GATE=" + str(strict_gate))
-raise SystemExit(0 if all(checks.values()) else 1)
-PY
-runtime_rc=${PIPESTATUS[0]}
-
-python3 "$PROJECT_ROOT/python/verify_contract.py" \
-  --reference "$REFERENCE" \
-  --candidate "$CANDIDATE" \
-  --report-json "$LOCAL_OUTPUT/corrected_float32_tolerance_report.json" \
-  --report-txt "$LOCAL_OUTPUT/corrected_float32_tolerance_report.txt"
-corrected_rc=$?
+if [[ -s "$CANDIDATE" ]]; then
+  python3 "$PROJECT_ROOT/python/verify_contract.py" \
+    --reference "$REFERENCE" \
+    --candidate "$CANDIDATE" \
+    --report-json "$LOCAL_OUTPUT/host_corrected_contract.json" \
+    --report-txt "$LOCAL_OUTPUT/host_corrected_contract.txt"
+  host_verify_rc=$?
+else
+  host_verify_rc=1
+fi
 set -e
 
-cat "$LOCAL_OUTPUT/corrected_float32_tolerance_report.txt"
-echo "RUNTIME_ACCEPTANCE_EXIT=$runtime_rc"
-echo "CORRECTED_VERIFICATION_EXIT=$corrected_rc"
+echo "HOST_CORRECTED_VERIFICATION_EXIT=$host_verify_rc"
 
-known_strict_rc=1
-if [[ $strict_rc -eq 0 ]]; then
-  known_strict_rc=0
-elif [[ $strict_rc -eq 1 ]] \
-  && grep -Fq 'FINAL_OUTPUT_VERIFICATION_GATE=FAIL' "$LOCAL_OUTPUT/remote_execution.log"; then
-  known_strict_rc=0
-fi
-
-if [[ $runtime_rc -eq 0 && $corrected_rc -eq 0 && $known_strict_rc -eq 0 ]]; then
-  echo "EXPECTED_STRICT_TOLERANCE_FAILURE_PRESERVED_GATE=PASS"
-  echo "CORRECTED_FLOAT32_CONTRACT_GATE=PASS"
+if [[ $remote_rc -eq 0 \
+   && $pull_rc -eq 0 \
+   && $host_verify_rc -eq 0 \
+   && -s "$LOCAL_OUTPUT/performance_result.json" \
+   && -s "$CANDIDATE" ]] \
+   && grep -Fq 'FINAL_DELIVERY_ACCEPTANCE_GATE=PASS' "$LOCAL_OUTPUT/remote_execution.log"; then
+  echo "OUTPUT_COORDINATES_GATE=PASS PATH=$CANDIDATE"
   echo "FINAL_DELIVERY_ACCEPTANCE_GATE=PASS"
   exit 0
 fi
 
-echo "EXPECTED_STRICT_TOLERANCE_FAILURE_PRESERVED_GATE=FAIL"
-echo "CORRECTED_FLOAT32_CONTRACT_GATE=$([[ $corrected_rc -eq 0 ]] && echo PASS || echo FAIL)"
+echo "OUTPUT_COORDINATES_GATE=FAIL"
 echo "FINAL_DELIVERY_ACCEPTANCE_GATE=FAIL"
 exit 1
