@@ -32,3 +32,6 @@ assets/unseen10/
 # Operating system
 .DS_Store
 Thumbs.db
+
+# Private Container-A visualization configuration
+tools/host_visualization.env
