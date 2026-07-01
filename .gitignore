@@ -1,6 +1,7 @@
-﻿# Python cache
+# Python cache
 __pycache__/
 *.py[cod]
+.pytest_cache/
 
 # Python environments
 .venv/
@@ -11,7 +12,7 @@ env/
 .idea/
 .vscode/
 
-# Local credentials and configuration
+# Local credentials and board configuration
 .env
 .env.*
 tools/board.env
@@ -23,6 +24,10 @@ tools/board.env
 outputs/
 runs/
 *.log
+
+# Large runtime assets installed separately
+models/QCS8550/
+assets/unseen10/
 
 # Operating system
 .DS_Store
