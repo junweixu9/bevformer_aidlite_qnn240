@@ -1,0 +1,27 @@
+{
+  "_comment": "Example ten-frame asset manifest. Replace record paths with real asset locations.",
+  "audit_type": "ASSET_MANIFEST_EXAMPLE",
+  "status": "PASS",
+  "frame_indices": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+  "frames": {
+    "sample_000": {
+      "images": "./assets/unseen10/sample_000/images.npy",
+      "can_bus": "./assets/unseen10/sample_000/can_bus.npy",
+      "lidar2img": "./assets/unseen10/sample_000/lidar2img.npy",
+      "shift": "./assets/unseen10/sample_000/shift.npy",
+      "prev_bev_reference_semantic": "./assets/unseen10/sample_000/prev_bev_zero.npy"
+    },
+    "sample_001": {
+      "images": "./assets/unseen10/sample_001/images.npy",
+      "can_bus": "./assets/unseen10/sample_001/can_bus.npy",
+      "lidar2img": "./assets/unseen10/sample_001/lidar2img.npy",
+      "shift": "./assets/unseen10/sample_001/shift.npy",
+      "rotation_can_bus": "./assets/unseen10/sample_001/rotation_can_bus.npy"
+    }
+  },
+  "frame000_asset_resolution": "frame000_uses_zero_prev_bev",
+  "runner_state": "live_prev_bev_recursion",
+  "scene_start_indices": [0],
+  "staged_asset_count": 50,
+  "zero_prev_bev_sha256": null
+}
