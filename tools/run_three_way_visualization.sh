@@ -45,7 +45,7 @@ OUTPUT_DIR="$THREE_WAY_VISUALIZATION_OUTPUT_ROOT/run_$STAMP"
 mkdir -p "$THREE_WAY_VISUALIZATION_OUTPUT_ROOT"
 
 "$HOST_A_PYTHON" \
-    "$PROJECT_ROOT/visualization/render_three_way_comparison.py" \
+    "$PROJECT_ROOT/visualization/render_three_way_comparison_v2.py" \
     --source-root "$BEVFORMER_SOURCE_ROOT" \
     --local-visualization-dir "$LOCAL_PYTORCH_VISUALIZATION_DIR" \
     --qnn-visualization-dir "$QNN240_VISUALIZATION_DIR" \
