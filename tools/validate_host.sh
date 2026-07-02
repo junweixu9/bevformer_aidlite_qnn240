@@ -18,6 +18,8 @@ python3 -m py_compile \
   python/runtime_api.py \
   python/postprocess_api.py \
   python/bevformer_aidlite_qnn240_e2e_performance_v1.py \
+  python/bevformer_aidlite_qnn240_e2e_tenframe_export_v1.py \
+  python/verify_tenframe_coordinates.py \
   python/functional_mother.py \
   python/portable_numpy_nmsfreecoder.py \
   python/verify_contract.py \
