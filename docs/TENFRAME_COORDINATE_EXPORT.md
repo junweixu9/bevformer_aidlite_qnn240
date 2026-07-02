@@ -65,3 +65,18 @@ arguments, so the frozen runner receives its original CLI contract unchanged.
 This Host integration does not execute a board. A separate experimental board
 entry must be added later; the established `tools/run_board.sh` remains
 unchanged.
+
+## Accepted strict-runner outcome
+
+The established delivery acceptance permits two frozen-runner outcomes:
+
+1. exit `0`, or
+2. exit `1` when the frozen strict coordinate gate is `FAIL`, no runtime
+   exception occurred, all 3 warmup and 10 measured frames completed,
+   interpreter identity remained stable, and cleanup passed.
+
+The second case preserves the established strict float32-tolerance result.
+The independent board entry must still run `acceptance.py` against Frame009
+before declaring final delivery acceptance. The sidecar only treats the known
+strict outcome as non-fatal so that it can write and exactly verify the
+ten-frame coordinate asset.

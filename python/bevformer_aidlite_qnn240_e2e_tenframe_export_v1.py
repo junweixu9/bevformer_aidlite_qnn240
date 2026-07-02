@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import importlib.util
+import json
 import os
 import sys
 import traceback
@@ -43,6 +44,54 @@ def get_option_value(argv, option):
         if value.startswith(prefix):
             return value[len(prefix):]
     raise RuntimeError("Required command option absent: {}".format(option))
+
+
+def evaluate_base_runner_outcome(
+    base_rc,
+    result_path,
+    warmup_count,
+    measured_count,
+):
+    result_path = Path(result_path)
+    if not result_path.is_file() or result_path.stat().st_size == 0:
+        raise RuntimeError(
+            "Base runner result JSON missing: {}".format(result_path)
+        )
+
+    runtime_result = json.loads(
+        result_path.read_text(encoding="utf-8")
+    )
+    no_exception = "exception_type" not in runtime_result
+    runtime_ok = bool(
+        len(runtime_result.get("warmup_frames", []))
+        == int(warmup_count)
+        and len(runtime_result.get("measured_frames", []))
+        == int(measured_count)
+        and runtime_result.get("interpreter_identity_stable") is True
+        and runtime_result.get("cleanup_gate") == "PASS"
+        and no_exception
+    )
+    strict_gate = runtime_result.get(
+        "final_output_verification",
+        {},
+    ).get("gate", "FAIL")
+    known_strict_outcome = bool(
+        int(base_rc) == 0
+        or (
+            int(base_rc) == 1
+            and strict_gate == "FAIL"
+            and no_exception
+        )
+    )
+    passed = bool(runtime_ok and known_strict_outcome)
+
+    return {
+        "runtime_result": runtime_result,
+        "runtime_ok": runtime_ok,
+        "strict_gate": strict_gate,
+        "known_strict_outcome": known_strict_outcome,
+        "gate": "PASS" if passed else "FAIL",
+    }
 
 
 def stack_collected(records, measured_count=10):
@@ -213,10 +262,37 @@ def main():
         finally:
             base_runner.execute_frame = original_execute_frame
 
-        if base_rc != 0:
+        result_json_path = Path(
+            get_option_value(sys.argv[1:], "--result-json")
+        )
+        base_outcome = evaluate_base_runner_outcome(
+            base_rc,
+            result_json_path,
+            warmup_count=int(base_runner.WARMUP_COUNT),
+            measured_count=int(base_runner.MEASURED_FRAME_COUNT),
+        )
+
+        if base_outcome["gate"] != "PASS":
             print("BASE_RUNNER_EXIT={}".format(base_rc))
+            print(
+                "BASE_RUNNER_RUNTIME_GATE={}".format(
+                    "PASS" if base_outcome["runtime_ok"] else "FAIL"
+                )
+            )
+            print(
+                "BASE_RUNNER_STRICT_OUTPUT_GATE={}".format(
+                    base_outcome["strict_gate"]
+                )
+            )
+            print(
+                "BASE_RUNNER_KNOWN_STRICT_OUTCOME_GATE={}".format(
+                    "PASS"
+                    if base_outcome["known_strict_outcome"]
+                    else "FAIL"
+                )
+            )
             print("TENFRAME_COORDINATE_EXPORT_GATE=FAIL")
-            return base_rc
+            return base_rc if base_rc != 0 else 1
 
         expected_calls = int(
             base_runner.WARMUP_COUNT
@@ -255,6 +331,17 @@ def main():
         report.update(
             {
                 "base_runner_exit": base_rc,
+                "base_runner_runtime_gate": (
+                    "PASS" if base_outcome["runtime_ok"] else "FAIL"
+                ),
+                "base_runner_strict_output_gate":
+                    base_outcome["strict_gate"],
+                "base_runner_known_strict_outcome_gate": (
+                    "PASS"
+                    if base_outcome["known_strict_outcome"]
+                    else "FAIL"
+                ),
+                "base_runner_outcome_gate": base_outcome["gate"],
                 "execute_frame_call_count": call_count,
                 "warmup_count": int(base_runner.WARMUP_COUNT),
                 "measured_frame_count": int(
@@ -275,7 +362,25 @@ def main():
         )
 
         print(report_text_path.read_text(encoding="utf-8"), end="")
-        print("BASE_RUNNER_EXIT=0")
+        print("BASE_RUNNER_EXIT={}".format(base_rc))
+        print(
+            "BASE_RUNNER_RUNTIME_GATE={}".format(
+                "PASS" if base_outcome["runtime_ok"] else "FAIL"
+            )
+        )
+        print(
+            "BASE_RUNNER_STRICT_OUTPUT_GATE={}".format(
+                base_outcome["strict_gate"]
+            )
+        )
+        print(
+            "BASE_RUNNER_KNOWN_STRICT_OUTCOME_GATE={}".format(
+                "PASS"
+                if base_outcome["known_strict_outcome"]
+                else "FAIL"
+            )
+        )
+        print("BASE_RUNNER_OUTCOME_GATE={}".format(base_outcome["gate"]))
         print("EXECUTE_FRAME_CALL_COUNT={}".format(call_count))
         print("SIDECAR_MEMORY_COLLECTION_ENABLED=YES")
         print("MEASURED_LOOP_FILE_WRITE=NO")

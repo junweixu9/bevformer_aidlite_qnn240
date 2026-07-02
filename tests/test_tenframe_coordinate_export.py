@@ -143,3 +143,88 @@ def test_stack_collected_rejects_nonsequential_indices():
     records[7]["frame_index"] = 8
     with pytest.raises(RuntimeError, match="frame indices mismatch"):
         SIDECAR.stack_collected(records)
+
+
+def write_runtime_result(
+    path,
+    *,
+    strict_gate="PASS",
+    cleanup_gate="PASS",
+    include_exception=False,
+):
+    import json
+
+    result = {
+        "warmup_frames": [{"frame_index": i} for i in range(3)],
+        "measured_frames": [{"frame_index": i} for i in range(10)],
+        "interpreter_identity_stable": True,
+        "cleanup_gate": cleanup_gate,
+        "final_output_verification": {"gate": strict_gate},
+    }
+    if include_exception:
+        result["exception_type"] = "RuntimeError"
+    path.write_text(json.dumps(result), encoding="utf-8")
+
+
+def test_base_outcome_accepts_zero_exit(tmp_path):
+    result_path = tmp_path / "performance_result.json"
+    write_runtime_result(result_path, strict_gate="PASS")
+    outcome = SIDECAR.evaluate_base_runner_outcome(
+        0,
+        result_path,
+        warmup_count=3,
+        measured_count=10,
+    )
+    assert outcome["runtime_ok"] is True
+    assert outcome["known_strict_outcome"] is True
+    assert outcome["gate"] == "PASS"
+
+
+def test_base_outcome_accepts_known_strict_failure(tmp_path):
+    result_path = tmp_path / "performance_result.json"
+    write_runtime_result(result_path, strict_gate="FAIL")
+    outcome = SIDECAR.evaluate_base_runner_outcome(
+        1,
+        result_path,
+        warmup_count=3,
+        measured_count=10,
+    )
+    assert outcome["runtime_ok"] is True
+    assert outcome["strict_gate"] == "FAIL"
+    assert outcome["known_strict_outcome"] is True
+    assert outcome["gate"] == "PASS"
+
+
+def test_base_outcome_rejects_runtime_failure(tmp_path):
+    result_path = tmp_path / "performance_result.json"
+    write_runtime_result(
+        result_path,
+        strict_gate="FAIL",
+        cleanup_gate="FAIL",
+    )
+    outcome = SIDECAR.evaluate_base_runner_outcome(
+        1,
+        result_path,
+        warmup_count=3,
+        measured_count=10,
+    )
+    assert outcome["runtime_ok"] is False
+    assert outcome["gate"] == "FAIL"
+
+
+def test_base_outcome_rejects_exception(tmp_path):
+    result_path = tmp_path / "performance_result.json"
+    write_runtime_result(
+        result_path,
+        strict_gate="FAIL",
+        include_exception=True,
+    )
+    outcome = SIDECAR.evaluate_base_runner_outcome(
+        1,
+        result_path,
+        warmup_count=3,
+        measured_count=10,
+    )
+    assert outcome["runtime_ok"] is False
+    assert outcome["known_strict_outcome"] is False
+    assert outcome["gate"] == "FAIL"
