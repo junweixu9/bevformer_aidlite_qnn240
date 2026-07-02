@@ -80,3 +80,20 @@ The independent board entry must still run `acceptance.py` against Frame009
 before declaring final delivery acceptance. The sidecar only treats the known
 strict outcome as non-fatal so that it can write and exactly verify the
 ten-frame coordinate asset.
+
+## Independent board execution entry
+
+Container B uses the independent entry:
+
+```bash
+bash tools/run_board_tenframe_export.sh
+```
+
+The entry preserves `tools/run_board.sh` and the frozen performance runner. It
+deploys the sidecar and verifier, executes 3 warmup plus 10 measured frames,
+runs the established Frame009 delivery acceptance, independently verifies the
+ten-frame exact contract, pulls all output assets, and repeats the coordinate
+and runtime checks on Container B.
+
+The entry writes to timestamped remote and local output directories. It does
+not overwrite a previous run.

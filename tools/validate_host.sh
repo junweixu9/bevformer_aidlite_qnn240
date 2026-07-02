@@ -31,6 +31,7 @@ bash -n \
   tools/validate_host.sh \
   tools/run_remote.sh \
   tools/run_board.sh \
+  tools/run_board_tenframe_export.sh \
   tools/preflight_host.sh \
   tools/preflight_board.sh \
   tools/copy_models.sh
