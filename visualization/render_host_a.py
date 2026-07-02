@@ -107,7 +107,11 @@ def main():
     prev_cwd = Path.cwd()
     try:
         os.chdir(str(source_root))
-        runpy.run_path(str(implementation), run_name="__main__")
+        try:
+            runpy.run_path(str(implementation), run_name="__main__")
+        except SystemExit as exc:
+            if exc.code not in (None, 0):
+                raise
     finally:
         os.chdir(str(prev_cwd))
 
