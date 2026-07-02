@@ -21,7 +21,10 @@ python3 -m py_compile \
   python/functional_mother.py \
   python/portable_numpy_nmsfreecoder.py \
   python/verify_contract.py \
-  tools/copy_demo_assets.py
+  tools/copy_demo_assets.py \
+  visualization/render_host_a.py \
+  visualization/render_host_a_impl.py \
+  visualization/render_three_way_comparison.py
 
 echo "PYTHON_COMPILE_GATE=PASS"
 
@@ -31,7 +34,10 @@ bash -n \
   tools/run_board.sh \
   tools/preflight_host.sh \
   tools/preflight_board.sh \
-  tools/copy_models.sh
+  tools/copy_models.sh \
+  tools/run_host_a_visualization.sh \
+  tools/run_three_way_visualization.sh \
+  tools/serve_latest_three_way_visualization.sh
 
 echo "SHELL_SYNTAX_GATE=PASS"
 
