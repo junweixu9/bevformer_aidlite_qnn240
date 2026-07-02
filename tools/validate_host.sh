@@ -24,7 +24,8 @@ python3 -m py_compile \
   tools/copy_demo_assets.py \
   visualization/render_host_a.py \
   visualization/render_host_a_impl.py \
-  visualization/render_three_way_comparison.py
+  visualization/render_three_way_comparison.py \
+  visualization/render_three_way_comparison_v2.py
 
 echo "PYTHON_COMPILE_GATE=PASS"
 
