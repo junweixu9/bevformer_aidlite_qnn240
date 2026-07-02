@@ -35,3 +35,4 @@ Thumbs.db
 
 # Private Container-A visualization configuration
 tools/host_visualization.env
+tools/three_way_visualization.env
