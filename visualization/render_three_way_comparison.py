@@ -272,7 +272,6 @@ def render_gt_only_bev(nusc, sample_token: str, output_path: Path) -> None:
         pred_boxes,
         conf_th=1.0,
         verbose=False,
-        display_legend=False,
         savepath=str(output_path),
     )
 
